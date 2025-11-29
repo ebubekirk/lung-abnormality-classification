@@ -50,7 +50,7 @@ class BasicBlock(layers.Layer):
 # ResNet-34 Model
 # ------------------------------------------------
 class ResNet34(Model):
-    def __init__(self, input_channels, num_classes):
+    def __init__(self, num_classes):
         super().__init__()
 
         # Initial conv (7×7) + maxpool

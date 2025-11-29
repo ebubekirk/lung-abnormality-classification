@@ -208,3 +208,4 @@ __marimo__/
 
 # Ignore everything inside the data/images directory
 /data/images/*
+.DS_Store
