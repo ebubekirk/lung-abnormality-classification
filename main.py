@@ -2,11 +2,11 @@ import numpy as np
 import pandas as pd
 import os
 from sklearn.model_selection import KFold
-import tensorflow as tf
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from PIL import Image
 from models.ResNet34 import ResNet34
 from models.EfficientNetB0 import EfficientNetB0
 from models.DenseNet121 import DenseNet
+from helpers.preprocess import preprocess_images
 
 # Load your dataset
 def load_data(filepath):
@@ -17,14 +17,16 @@ def load_data(filepath):
     labels = data['Finding Labels'].values
     return np.array(image_paths), labels
 
-# Preprocess images
-def preprocess_images(image_paths):
+def load_images(image_paths):
     images = []
     for path in image_paths:
-        img = tf.keras.preprocessing.image.load_img(path, target_size=(200, 200))  # Adjust size as needed
-        img_array = tf.keras.preprocessing.image.img_to_array(img)
-        images.append(img_array)
-    return np.array(images) / 255.0  # Normalize images
+        try:
+            img = Image.open(path).convert("RGB")
+            img_np = np.array(img)  # HxWx3 uint8
+            images.append(img_np)
+        except Exception as e:
+            print(f"Error loading {path}: {e}")
+    return images
 
 # Train and evaluate model
 def train_and_evaluate_model(model, train_data, train_labels, val_data, val_labels):
@@ -36,7 +38,9 @@ def train_and_evaluate_model(model, train_data, train_labels, val_data, val_labe
 def main():
     # Load data
     image_paths, labels = load_data('data/Data_Entry_2017.csv')
-    images = preprocess_images(image_paths)
+    #preprocess_images(image_paths)
+    images = load_images(image_paths)
+    images = np.array([img.astype(np.float32) / 255.0 for img in images])
 
     # Initialize KFold
     kf = KFold(n_splits=10, shuffle=True, random_state=42)
